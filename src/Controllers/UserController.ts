@@ -19,6 +19,7 @@ class UserController {
 		this.router.get(`${this.path}/:id`, this.GetUserById);
 		this.router.post(this.path, this.AddUser);
 		this.router.post(`${this.path}/login`, this.LoginUser);
+		this.router.post(`${this.path}/exists/email`, this.EmailExists);
 	}
 
 	GetUsers = (req: Request, res: Response) => {
@@ -40,9 +41,21 @@ class UserController {
 
 	LoginUser = (req: Request, res: Response) => {
 		const userData: User = req.body;
-		console.log(JSON.stringify(userData));
 		res.status(404).send("cool cool");
 	};
+
+	EmailExists = (req:Request, res:Response) => {
+		const email:string = req.body;
+		const userData:User = {
+			Email: email
+		}
+
+		UserModel.exists(userData)
+		.then((exists) => {
+			res.status(200).send(exists);
+		});
+
+	}
 }
 
 export default UserController;
