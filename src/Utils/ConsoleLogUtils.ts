@@ -28,7 +28,7 @@ export enum ConsoleColour {
 	BgWhite = "\x1b[47m"
 }
 
-class ConsoleLogHelper {
+export class ConsoleLogUtils {
 	public static LogToConsole(message: string, ...coloursToApply: ConsoleColour[]) {
 		let displayString = "";
 
@@ -36,10 +36,12 @@ class ConsoleLogHelper {
 			displayString += colourToApply.toString();
 		});
 
-		displayString += message + ConsoleColour.Reset.toString();
+		displayString += message;
+
+		if (coloursToApply.length > 0) {
+			displayString +=  ConsoleColour.Reset.toString();
+		}
 
 		console.log(displayString);
 	}
 }
-
-export default ConsoleLogHelper;

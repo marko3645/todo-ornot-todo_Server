@@ -5,7 +5,8 @@
 	"main": "index.js",
 	"scripts": {
 		"dev": " ts-node-dev ./src/server.ts",
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "mocha -r ts-node/register src/**/*.test.ts",
+		"test-with-coverage":"nyc --reporter=text --reporter=lcov  --reporter=html mocha -r ts-node/register src/**/*.test.ts"
 	},
 	"repository": {
 		"type": "git",
@@ -14,11 +15,15 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
+		"@types/chai": "^4.2.10",
 		"@types/cors": "^2.8.6",
+		"@types/mocha": "^7.0.2",
 		"body-parser": "^1.19.0",
+		"chai": "^4.2.0",
 		"cors": "^2.8.5",
 		"dotenv": "^8.2.0",
 		"express": "^4.17.1",
+		"mocha": "^7.1.0",
 		"mongodb": "^3.5.2",
 		"mongoose": "^5.8.11",
 		"ts-node": "^8.6.2",
@@ -26,6 +31,7 @@
 	},
 	"devDependencies": {
 		"@types/mongoose": "^5.7.1",
+		"nyc": "^15.0.0",
 		"ts-node-dev": "^1.0.0-pre.44"
 	},
 	"type": "module"
