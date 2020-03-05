@@ -1,0 +1,33 @@
+# @format
+
+version: 2.1
+orbs:
+  node: circleci/node@1.1.6
+  sonarcloud: sonarsource/sonarcloud@1.0.1
+jobs:
+  build-and-test:
+    executor:
+      name: node/default
+    docker:
+      - image: circleci/node:latest
+    steps:
+      - checkout
+      - store_test_results:
+          path: coverage
+      - node/with-cache:
+          cache-key: package.json
+          dir: node_modules
+          steps:
+            - run:
+                name: install npm dependancies
+                command: npm install
+            - run:
+                name: run tests
+                command: npm run test-with-coverage
+      - sonarcloud/scan
+workflows:
+  version: 2
+  build-and-test:
+    jobs:
+      - build-and-test:
+          context: TODO_Server
