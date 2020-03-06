@@ -61,7 +61,7 @@ class UserController extends ControllerBase {
 
   private async CheckUserExists(user: User) {
     let dbUser = await UserModel.find(user);
-    return !!dbUser;
+    return dbUser && dbUser.length>0;
   }
 }
 

@@ -28,7 +28,9 @@ class App {
 
   constructor() {
     this.App = express();
+  }
 
+  public Init(){
     this.CheckEnvironmentVariables();
 
     this.InitializeMiddleware();
@@ -120,9 +122,6 @@ class App {
     });
 
     this.App.use((req, res:any, next) => {
-      console.log(
-        "Hello here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-      );
       let responseExtensionsManager = new ExtensionManager(
         new ResponseExtensions(res)
       );

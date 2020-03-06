@@ -1,5 +1,3 @@
-import * as express from 'express';
-
 import { Response } from "express";
 
 import { IModuleExtender } from "./ExtensionManager";
