@@ -4,6 +4,7 @@ import { ResponseExtensions } from "../../Extensions/ResponseExtensions";
 import * as express from "express";
 import { UserModel } from "../../DataAccess/Models/UserModel";
 import { DocumentQuery } from "mongoose";
+import User from "../../Models/User";
 describe("UserController", () => {
   let userController: UserController;
 
@@ -43,7 +44,6 @@ describe("UserController", () => {
     before(() => {
       givenPaths = [];
       userController.Router.get = (path: any, methodToRun: any) => {
-        console.log("Added Get");
         givenPaths.push({ path: path, method: "get" });
         return userController.Router;
       };
@@ -56,7 +56,6 @@ describe("UserController", () => {
     });
 
     it("Adds /users/:id get path", () => {
-      console.log(givenPaths);
       expect(givenPaths).to.deep.include({ path: "/users/:id", method: "get" });
     });
 
@@ -87,10 +86,88 @@ describe("UserController", () => {
       }
     };
     beforeEach(() => {});
+    let status;
+    res.send = () => {};
     describe("GetUserByID ", () => {
-      let status;
+      it("Sets status to ok when user is found", async () => {
+        res.OK = () => {
+          status = 200;
+          return res;
+        };
 
-     
+        UserModel.findById = id => {
+          let promise = new Promise((resolve: any) => {
+            resolve(true);
+          });
+          return (promise as unknown) as DocumentQuery<any, any, any>;
+        };
+        await userController.GetUserById(req, res);
+        expect(status).to.equal(200);
+      });
+      it("Sets status to notfound when user is not found", async () => {
+        res.NotFound = () => {
+          status = 404;
+          return res;
+        };
+        UserModel.findById = id => {
+          let promise = new Promise((resolve: any) => {
+            resolve(false);
+          });
+          return (promise as unknown) as DocumentQuery<any, any, any>;
+        };
+        await userController.GetUserById(req, res);
+        expect(status).to.equal(404);
+      });
+    });
+
+    describe("AddUser", () => {
+      req.body = {
+        Email: "marko3645@gmail.com",
+        Password: "MyAwesomePassword"
+      };
+      UserModel.prototype.save = function() {
+        let promise = new Promise<User & Document>(resolve => {
+          resolve(req.body);
+        });
+        return (promise as unknown) as DocumentQuery<any, any, any>;
+      };
+      it("Sets status to OK", async () => {
+        await userController.AddUser(req, res);
+        expect(status).to.equal(200);
+      });
+      it("Returns back the new user", async () => {
+        let sentValue;
+        res.send = (val: any) => {
+          sentValue = val;
+        };
+        await userController.AddUser(req, res);
+        expect(sentValue).to.equal(req.body);
+      });
+    });
+    describe("EmailExists", () => {
+      req.body = {
+        Email: "marko3645@gmail.com"
+      };
+      UserModel.find = (val: any) => {
+        let promise = new Promise(resolve => {
+          resolve([true]);
+        });
+        return (promise as unknown) as DocumentQuery<any, any, any>;
+      };
+      it("Sets the status to OK", async () => {
+        await userController.EmailExists(req, res);
+        expect(status).to.be.equal(200);
+      });
+      it("Returns true if the for an existing user", async () => {
+        let userExists;
+        res.send = (val: any) => {
+          userExists = val;
+        };
+
+        await userController.EmailExists(req, res);
+
+        expect(userExists).to.be.equal(true);
+      });
     });
   });
 });

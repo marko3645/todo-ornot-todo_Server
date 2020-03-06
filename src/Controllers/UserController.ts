@@ -23,21 +23,21 @@ class UserController extends ControllerBase {
       .post(`${this.Path}/exists/email`, this.EmailExists);
   }
 
-  GetUserById = (request: Request, response: Response) => {
+  GetUserById = async (request: Request, response: Response) => {
     const id = request.params.id;
-    UserModel.findById(id).then(user => {
-      if(user){
-        response.OK().send(user);
-      }else{
-        response.NotFound().send();
-      }
-    });
+    let user = await UserModel.findById(id);
+    if (user) {
+      response.OK().send(user);
+    } else {
+      response.NotFound().send();
+    }
   };
 
-  AddUser = (req: Request, res: Response) => {
+  AddUser = async (req: Request, res: Response) => {
     const userData: User = req.body;
     const newUser = new UserModel(userData);
-    newUser.save().then(savedUser => res.OK().send(savedUser));
+    let savedUser = await newUser.save();
+    res.OK().send(savedUser);
   };
 
   LoginUser = (req: Request, res: Response) => {
@@ -46,16 +46,13 @@ class UserController extends ControllerBase {
     res.NotFound().send("cool cool");
   };
 
-  EmailExists = (req: Request, res: Response) => {
-    console.log(req.body);
+  EmailExists = async (req: Request, res: Response) => {
     const email: string = req.body.email;
-    console.log(`Email Exists: ${email}`);
     const userData: User = {
       Email: email
     };
-    this.CheckUserExists(userData).then(exists => {
-      res.OK().send(exists);
-    });
+    let exists = await this.CheckUserExists(userData)
+    res.OK().send(exists);
   };
 
   private async CheckUserExists(user: User) {
