@@ -1,9 +1,11 @@
-import { Request, Response } from "express";
+import * as express from 'express';
+
+import { Response } from "express";
 
 import { IModuleExtender } from "./ExtensionManager";
 
 declare module "express" {
-  export class Response {
+  export interface Response {
     //200's
     OK(): Response; //200
     Created(): Response; //201
@@ -26,7 +28,9 @@ declare module "express" {
 }
 
 export class ResponseExtensions implements IModuleExtender {
-  constructor() {
+  private _response:Response;
+  constructor(response:Response) {
+    this._response = response;
     this.Init();
   }
 
@@ -38,68 +42,37 @@ export class ResponseExtensions implements IModuleExtender {
 
   private Setup200ResponseCodes() {
     let obj = this;
-    Response.prototype.OK = function() {
-      return obj.SetResponseStatus(this, 200);
-    };
-
-    Response.prototype.Created = function() {
-      return obj.SetResponseStatus(this, 201);
-    };
-
-    Response.prototype.Accepted = function() {
-      return obj.SetResponseStatus(this, 202);
-    };
-
-    Response.prototype.NoContent = function() {
-      return obj.SetResponseStatus(this, 204);
-    };
+    
+    this._response.OK = this.GetStatusSetFunction(obj, 200);
+    this._response.Created = this.GetStatusSetFunction(obj, 201);
+    this._response.Accepted = this.GetStatusSetFunction(obj, 202);
+    this._response.NoContent = this.GetStatusSetFunction(obj, 204);
   }
-
+  
   private Setup400ResponseCodes() {
     let obj = this;
 
-    Response.prototype.BadRequest = function() {
-      return obj.SetResponseStatus(this, 400);
-    };
-
-    Response.prototype.Unauthorized = function() {
-      return obj.SetResponseStatus(this, 401);
-    };
-
-    Response.prototype.Forbidden = function() {
-      return obj.SetResponseStatus(this, 403);
-    };
-
-    Response.prototype.NotFound = function() {
-      return obj.SetResponseStatus(this, 404);
-    };
-
-    Response.prototype.MethodNotAllowed = function() {
-      return obj.SetResponseStatus(this, 405);
-    };
-
-    Response.prototype.NotAcceptable = function() {
-      return obj.SetResponseStatus(this, 406);
-    };
-
-    Response.prototype.PreconditionFailed = function() {
-      return obj.SetResponseStatus(this, 412);
-    };
-
-    Response.prototype.UnsopportedMediaType = function() {
-      return obj.SetResponseStatus(this, 415);
-    };
+    this._response.BadRequest = this.GetStatusSetFunction(obj, 400);
+    this._response.Unauthorized = this.GetStatusSetFunction(obj, 401);
+    this._response.Forbidden = this.GetStatusSetFunction(obj, 403);
+    this._response.NotFound = this.GetStatusSetFunction(obj, 404);
+    this._response.MethodNotAllowed = this.GetStatusSetFunction(obj, 405);
+    this._response.NotAcceptable = this.GetStatusSetFunction(obj, 406);
+    this._response.PreconditionFailed = this.GetStatusSetFunction(obj, 412);
+    this._response.UnsopportedMediaType = this.GetStatusSetFunction(obj, 415);
   }
-
+  
   private Setup500ResponseCodes() {
     let obj = this;
-    Response.prototype.InternalServerError = function() {
-      return obj.SetResponseStatus(this, 500);
-    };
+    this._response.InternalServerError = this.GetStatusSetFunction(obj, 500);
+    this._response.NotImplemented = this.GetStatusSetFunction(obj, 501);
+  }
 
-    Response.prototype.NotImplemented = function() {
-      return obj.SetResponseStatus(this, 501);
-    };
+
+  private GetStatusSetFunction(context, status){
+    return function() {
+      return context.SetResponseStatus(this, status);
+    }
   }
 
   private SetResponseStatus(context: unknown, status: number): Response {

@@ -11,7 +11,7 @@ import {
 } from "./Utils/ConsoleLogUtils";
 import { ExtensionManager } from "./Extensions/ExtensionManager";
 import { ResponseExtensions } from "./Extensions/ResponseExtensions";
-import UserController from "Controllers/UserController";
+import UserController from "./Controllers/UserController";
 
 interface IConfig {
   MONGO_USER: string;
@@ -32,9 +32,9 @@ class App {
     this.CheckEnvironmentVariables();
 
     this.InitializeMiddleware();
-    this.InitializeModuleExtensions();
     this.InitializeControllers();
     this.InitializeDatabaseConnection();
+    this.InitializeModuleExtensions();
   }
 
   private CheckEnvironmentVariables() {
@@ -69,7 +69,7 @@ class App {
         Value: ORIGIN_ADDRESS
       },
       {
-        Name:"PORT",
+        Name: "PORT",
         Value: PORT
       }
     ];
@@ -105,24 +105,38 @@ class App {
   }
 
   private InitializeMiddleware() {
+    //Json parser
+    this.App.use((req, res,next) => {
+      bodyParser.json();
+      next();
+    });
+    //Cors
     console.log(`Allowing cors for ${this.Config.ORIGIN_ADDRESS}`);
-    this.App.use(bodyParser.json());
-    this.App.use(
+    this.App.use((req, res, next) => {
       cors({
         origin: this.Config.ORIGIN_ADDRESS
-      })
-    );
+      });
+      next()
+    });
+
+    this.App.use((req, res:any, next) => {
+      console.log(
+        "Hello here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+      );
+      let responseExtensionsManager = new ExtensionManager(
+        new ResponseExtensions(res)
+      );
+      responseExtensionsManager.Init();
+      next();
+    });
   }
 
   private InitializeModuleExtensions() {
-    let extensionManager = new ExtensionManager(new ResponseExtensions());
+    // let extensionManager = new ExtensionManager(new ResponseExtensions());
   }
 
   private InitializeControllers() {
-
-    let controllers = [
-      new UserController()
-    ]
+    let controllers = [new UserController()];
 
     controllers.forEach(controller => {
       this.App.use("/", controller.router);

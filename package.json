@@ -6,7 +6,7 @@
 	"scripts": {
 		"dev": " ts-node-dev ./src/server.ts",
 		"test": "mocha -r ts-node/register src/**/*.test.ts",
-		"test-with-coverage":"nyc --reporter=text --reporter=lcov  --reporter=html mocha -r ts-node/register src/**/*.test.ts"
+		"test-with-coverage": "nyc --reporter=text --reporter=lcov  --reporter=html mocha -r ts-node/register src/**/*.test.ts"
 	},
 	"repository": {
 		"type": "git",
