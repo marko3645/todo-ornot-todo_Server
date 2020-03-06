@@ -7,8 +7,8 @@ import { UserModel } from "../DataAccess/Models/UserModel";
 import { ControllerBase } from "./ControllerBase";
 
 class UserController extends ControllerBase {
-  public path = "/users";
-  public router = express.Router();
+  public Path = "/users";
+  public Router = express.Router();
 
   constructor() {
     super();
@@ -17,16 +17,11 @@ class UserController extends ControllerBase {
 
   //Setup routes
   public InitializeRoutes() {
-    this.router.get(this.path, this.GetUsers);
-    this.router.get(`${this.path}/:id`, this.GetUserById);
-    this.router.post(this.path, this.AddUser);
-    this.router.post(`${this.path}/login`, this.LoginUser);
-    this.router.post(`${this.path}/exists/email`, this.EmailExists);
+    this.Router.get(`${this.Path}/:id`, this.GetUserById)
+      .post(this.Path, this.AddUser)
+      .post(`${this.Path}/login`, this.LoginUser)
+      .post(`${this.Path}/exists/email`, this.EmailExists);
   }
-
-  GetUsers = (req: Request, res: Response) => {
-    UserModel.find().then(users => res.OK().send(users));
-  };
 
   GetUserById = (request: Request, response: Response) => {
     const id = request.params.id;
@@ -53,7 +48,7 @@ class UserController extends ControllerBase {
     console.log(`Email Exists: ${email}`);
     const userData: User = {
       Email: email
-	};
+    };
     this.CheckUserExists(userData).then(exists => {
       res.OK().send(exists);
     });
@@ -61,7 +56,7 @@ class UserController extends ControllerBase {
 
   private async CheckUserExists(user: User) {
     let dbUser = await UserModel.find(user);
-    return dbUser && dbUser.length>0;
+    return dbUser && dbUser.length > 0;
   }
 }
 
