@@ -26,7 +26,11 @@ class UserController extends ControllerBase {
   GetUserById = (request: Request, response: Response) => {
     const id = request.params.id;
     UserModel.findById(id).then(user => {
-      response.OK().send(user);
+      if(user){
+        response.OK().send(user);
+      }else{
+        response.NotFound().send();
+      }
     });
   };
 

@@ -2,7 +2,8 @@ import { expect } from "chai";
 import UserController from "../../Controllers/UserController";
 import { ResponseExtensions } from "../../Extensions/ResponseExtensions";
 import * as express from "express";
-
+import { UserModel } from "../../DataAccess/Models/UserModel";
+import { DocumentQuery } from "mongoose";
 describe("UserController", () => {
   let userController: UserController;
 
@@ -75,6 +76,21 @@ describe("UserController", () => {
         path: "/users/exists/email",
         method: "post"
       });
+    });
+  });
+
+  describe("API Methods", () => {
+    let res: any = {};
+    let req: any = {
+      params: {
+        id: "5aa06bb80738152cfd536fdc" // for testing get, delete and update vehicle
+      }
+    };
+    beforeEach(() => {});
+    describe("GetUserByID ", () => {
+      let status;
+
+     
     });
   });
 });
