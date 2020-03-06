@@ -63,13 +63,6 @@ describe("UserController", () => {
       expect(givenPaths).to.deep.include({ path: "/users", method: "post" });
     });
 
-    it("Adds /users/login post path", () => {
-      expect(givenPaths).to.deep.include({
-        path: "/users/login",
-        method: "post"
-      });
-    });
-
     it("Adds /users/exists/email post path", () => {
       expect(givenPaths).to.deep.include({
         path: "/users/exists/email",
