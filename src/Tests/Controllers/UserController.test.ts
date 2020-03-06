@@ -14,7 +14,7 @@ describe("UserController", () => {
   });
 
   beforeEach(() => {
-    userController = new UserController();
+    userController = new UserController("/users");
   });
 
   describe("Constructor", () => {
@@ -28,7 +28,7 @@ describe("UserController", () => {
         calledInitializeRoutes = true;
       };
 
-      new UserController();
+      new UserController("/users");
       UserController.prototype.InitializeRoutes = previousUserControllerInitializeRoutes;
       expect(calledInitializeRoutes).to.equal(true);
     });

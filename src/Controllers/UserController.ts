@@ -8,7 +8,6 @@ import { ControllerBase } from "./ControllerBase";
 
 class UserController extends ControllerBase {
   public Path = "/users";
-  public Router = express.Router();
 
   constructor() {
     super();

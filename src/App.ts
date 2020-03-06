@@ -2,6 +2,8 @@
 
 import * as express from "express";
 import * as bodyParser from "body-parser";
+import * as cookieParser from "cookie-parser"
+import * as session from 'express-session'
 import * as mongoose from "mongoose";
 import * as cors from "cors";
 import {
@@ -12,6 +14,10 @@ import {
 import { ExtensionManager } from "./Extensions/ExtensionManager";
 import { ResponseExtensions } from "./Extensions/ResponseExtensions";
 import UserController from "./Controllers/UserController";
+import { AuthController } from "Controllers/AuthController";
+import { ControllerBase } from "Controllers/ControllerBase";
+import {AuthSetupService} from 'Services/AuthSetupService';
+import * as passport from 'passport';
 
 interface IConfig {
   MONGO_USER: string;
@@ -19,6 +25,7 @@ interface IConfig {
   MONGO_PATH: string;
   PORT: number;
   ORIGIN_ADDRESS: string;
+  APP_SECRET:string;
 }
 
 class App {
@@ -30,13 +37,14 @@ class App {
     this.App = express();
   }
 
-  public Init(){
+  public Init() {
     this.CheckEnvironmentVariables();
 
     this.InitializeMiddleware();
     this.InitializeControllers();
     this.InitializeDatabaseConnection();
     this.InitializeModuleExtensions();
+    this.SetupServices();
   }
 
   private CheckEnvironmentVariables() {
@@ -45,7 +53,8 @@ class App {
       MONGO_PASSWORD,
       MONGO_PATH,
       ORIGIN_ADDRESS,
-      PORT
+      PORT,
+      APP_SECRET
     } = process.env;
 
     let errorLines = "";
@@ -73,6 +82,10 @@ class App {
       {
         Name: "PORT",
         Value: PORT
+      },
+      {
+        Name: "APP_Secret",
+        Value: APP_SECRET
       }
     ];
 
@@ -108,20 +121,29 @@ class App {
 
   private InitializeMiddleware() {
     //Json parser
-    this.App.use((req, res,next) => {
-      bodyParser.json();
-      next();
-    });
+    this.App.use(bodyParser.json());
     //Cors
     console.log(`Allowing cors for ${this.Config.ORIGIN_ADDRESS}`);
-    this.App.use((req, res, next) => {
+    this.App.use(
       cors({
         origin: this.Config.ORIGIN_ADDRESS
-      });
-      next()
-    });
+      })
+    );
 
-    this.App.use((req, res:any, next) => {
+    //cookieparser
+    this.App.use(cookieParser(this.Config.APP_SECRET))
+
+    //sessionParser
+    this.App.use(session({
+      secret: this.Config.APP_SECRET,
+    }));
+
+    //Passport setup
+    this.App.use(passport.initialize());
+    this.App.use(passport.session());
+
+    //Response extensions
+    this.App.use((req, res: any, next) => {
       let responseExtensionsManager = new ExtensionManager(
         new ResponseExtensions(res)
       );
@@ -135,10 +157,10 @@ class App {
   }
 
   private InitializeControllers() {
-    let controllers = [new UserController()];
+    let controllers:ControllerBase[] = [new UserController("/users"), new AuthController("/auth")];
 
     controllers.forEach(controller => {
-      this.App.use("/", controller.router);
+      this.App.use("/", controller.Router);
     });
   }
 
@@ -167,6 +189,12 @@ class App {
         );
       });
   }
+
+  private SetupServices(){
+    let authSetupService = new AuthSetupService()
+    authSetupService.Init();
+  }
+
 }
 
 export default App;
