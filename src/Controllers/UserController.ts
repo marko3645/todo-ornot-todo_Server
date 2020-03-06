@@ -7,10 +7,10 @@ import { UserModel } from "../DataAccess/Models/UserModel";
 import { ControllerBase } from "./ControllerBase";
 
 class UserController extends ControllerBase {
-  public Path = "/users";
 
-  constructor() {
-    super();
+
+  constructor(path) {
+    super(path);
     this.InitializeRoutes();
   }
 
@@ -18,7 +18,6 @@ class UserController extends ControllerBase {
   public InitializeRoutes() {
     this.Router.get(`${this.Path}/:id`, this.GetUserById)
       .post(this.Path, this.AddUser)
-      .post(`${this.Path}/login`, this.LoginUser)
       .post(`${this.Path}/exists/email`, this.EmailExists);
   }
 
@@ -39,11 +38,6 @@ class UserController extends ControllerBase {
     res.OK().send(savedUser);
   };
 
-  LoginUser = (req: Request, res: Response) => {
-    const userData: User = req.body;
-
-    res.NotFound().send("cool cool");
-  };
 
   EmailExists = async (req: Request, res: Response) => {
     const email: string = req.body.email;
