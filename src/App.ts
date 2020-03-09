@@ -2,8 +2,8 @@
 
 import * as express from "express";
 import * as bodyParser from "body-parser";
-import * as cookieParser from "cookie-parser"
-import * as session from 'express-session'
+import * as cookieParser from "cookie-parser";
+import * as session from "express-session";
 import * as mongoose from "mongoose";
 import * as cors from "cors";
 import {
@@ -14,10 +14,13 @@ import {
 import { ExtensionManager } from "./Extensions/ExtensionManager";
 import { ResponseExtensions } from "./Extensions/ResponseExtensions";
 import UserController from "./Controllers/UserController";
-import { AuthController } from "Controllers/AuthController";
-import { ControllerBase } from "Controllers/ControllerBase";
-import {AuthSetupService} from 'Services/AuthSetupService';
-import * as passport from 'passport';
+import { AuthController } from "./Controllers/AuthController";
+import { ControllerBase } from "./Controllers/ControllerBase";
+import { AuthSetupService } from "./Services/AuthSetupService";
+import * as passport from "passport";
+import { IOCContainer } from "./IOCContainer";
+import { InversifyExpressServer } from "inversify-express-utils";
+import "reflect-metadata";
 
 interface IConfig {
   MONGO_USER: string;
@@ -25,16 +28,28 @@ interface IConfig {
   MONGO_PATH: string;
   PORT: number;
   ORIGIN_ADDRESS: string;
-  APP_SECRET:string;
+  APP_SECRET: string;
 }
 
-class App {
+export class App {
   public App: express.Application;
 
   private Config: IConfig = (process.env as unknown) as IConfig;
 
   constructor() {
-    this.App = express();
+    let container = this.SetupIOCContainer();
+    let server = new InversifyExpressServer(container);
+    server.setConfig(app => {
+      this.App = app;
+      this.Init();
+    });
+    this.App = server.build();
+    this.Listen();
+  }
+
+  private SetupIOCContainer() {
+    let iocContainer = new IOCContainer();
+    return iocContainer.Init();
   }
 
   public Init() {
@@ -131,12 +146,14 @@ class App {
     );
 
     //cookieparser
-    this.App.use(cookieParser(this.Config.APP_SECRET))
+    this.App.use(cookieParser(this.Config.APP_SECRET));
 
     //sessionParser
-    this.App.use(session({
-      secret: this.Config.APP_SECRET,
-    }));
+    this.App.use(
+      session({
+        secret: this.Config.APP_SECRET
+      })
+    );
 
     //Passport setup
     this.App.use(passport.initialize());
@@ -157,7 +174,10 @@ class App {
   }
 
   private InitializeControllers() {
-    let controllers:ControllerBase[] = [new UserController("/users"), new AuthController("/auth")];
+    let controllers: ControllerBase[] = [
+      new UserController("/users"),
+      new AuthController("/auth")
+    ];
 
     controllers.forEach(controller => {
       this.App.use("/", controller.Router);
@@ -190,11 +210,8 @@ class App {
       });
   }
 
-  private SetupServices(){
-    let authSetupService = new AuthSetupService()
+  private SetupServices() {
+    let authSetupService = new AuthSetupService();
     authSetupService.Init();
   }
-
 }
-
-export default App;

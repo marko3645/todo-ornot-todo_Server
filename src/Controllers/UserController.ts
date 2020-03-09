@@ -1,24 +1,30 @@
 /** @format */
 
 import * as express from "express";
+import "reflect-metadata"
 import { Request, Response } from "express";
 import User from "Models/User";
 import { UserModel } from "../DataAccess/Models/UserModel";
 import { ControllerBase } from "./ControllerBase";
 
-class UserController extends ControllerBase {
+import { INJECTABLES } from "../IOCContainer";
+import { inject, injectable } from "inversify";
+import { IUserRepository } from "../DataAccess/Repositories/UserRepository";
+import { interfaces, controller, httpGet, httpPost, httpDelete, request, queryParam, response, requestParam, requestBody } from "inversify-express-utils";
+@controller("/users")
+class UserController  {
 
+  private _userRepository:IUserRepository;
 
-  constructor(path) {
-    super(path);
+  public constructor() {
     this.InitializeRoutes();
   }
 
   //Setup routes
   public InitializeRoutes() {
-    this.Router.get(`${this.Path}/:id`, this.GetUserById)
-      .post(this.Path, this.AddUser)
-      .post(`${this.Path}/exists/email`, this.EmailExists);
+    // this.Router.get(`${this.Path}/:id`, this.GetUserById)
+    //   .post(this.Path, this.AddUser)
+      // .post(`${this.Path}/exists/email`, this.EmailExists);
   }
 
   GetUserById = async (request: Request, response: Response) => {
@@ -31,22 +37,36 @@ class UserController extends ControllerBase {
     }
   };
 
+  
   AddUser = async (req: Request, res: Response) => {
     const userData: User = req.body;
-    const newUser = new UserModel(userData);
-    let savedUser = await newUser.save();
+    let savedUser = this._userRepository.AddNew(userData);
     res.OK().send(savedUser);
   };
 
-
-  EmailExists = async (req: Request, res: Response) => {
-    const email: string = req.body.email;
+  @httpPost("exists/email")
+  public async EmailExists(
+    @request() req:express.Request,
+    @response() res:express.Response
+  ){
+    console.log(this._userRepository)
+    let email = req.body.email;
     const userData: User = {
       Email: email
     };
-    let exists = await this.CheckUserExists(userData)
+    let exists = await this.CheckUserExists(userData);
     res.OK().send(exists);
-  };
+  }
+
+  // EmailExists = async (req: Request, res: Response) => {
+  //   console.log(this._userRepository)
+  //   const email: string = req.body.email;
+  //   const userData: User = {
+  //     Email: email
+  //   };
+  //   let exists = await this.CheckUserExists(userData);
+  //   res.OK().send(exists);
+  // };
 
   private async CheckUserExists(user: User) {
     let dbUser = await UserModel.find(user);

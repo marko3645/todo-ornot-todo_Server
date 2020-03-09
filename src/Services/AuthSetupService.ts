@@ -1,17 +1,21 @@
 import * as passport from "passport";
 import * as LocalStrategy from "passport-local";
-import { UserModel } from "DataAccess/Models/UserModel";
-import User from "Models/User";
-import { UserRepository } from "DataAccess/Repositories/UserRepository";
+import { UserRepository } from "../DataAccess/Repositories/UserRepository";
 
 export class AuthSetupService {
   constructor() {}
   public async Init() {
-    passport.use(await this.BuildLocalStrategy());
+    let localStrategy = await this.BuildLocalStrategy();
+    passport.use(localStrategy);
   }
 
   private async BuildLocalStrategy() {
-    return new LocalStrategy.Strategy(async function(
+    return new LocalStrategy.Strategy(
+      {
+        usernameField: "Email",
+        passwordField: "Password"
+      }
+      ,async function(
       email,
       clearTextPassword,
       done

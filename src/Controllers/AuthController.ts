@@ -1,16 +1,25 @@
 import { ControllerBase } from "./ControllerBase";
-import * as passport from 'passport';
+import * as passport from "passport";
+import { Request, Response, NextFunction } from "express";
+export class AuthController {
+  constructor(path: string) {
 
-export class AuthController extends ControllerBase{
+    this.InitializeRoutes();
+  }
 
-    constructor(path:string){
-        super(path);
-        this.InitializeRoutes();
-    }
-
-    private InitializeRoutes(){
-        this.Router.post('/login', passport.authenticate('local', {
-            successRedirect: '/'
-        }));
-    }
+  private InitializeRoutes() {
+    // this.Router.post(
+    //   `${this.Path}/login`,
+    //   (req: Request, res: Response, next: NextFunction) => {
+    //     passport.authenticate("local", function(err, user, info) {
+    //       req.login(user, function() {
+    //         console.log(err);
+    //         console.log(user);
+    //         console.log(info);
+    //         res.OK().send(user);
+    //       });
+    //     })(req, res);
+    //   }
+    // );
+  }
 }
