@@ -1,15 +1,22 @@
-import * as bcrypt from 'bcrypt';
+/** @format */
 
-export class HashingUtils{
-    public static async HashText(text:string):Promise<string>{
-      const saltRounds = 10;
-      let salt:string = await bcrypt.genSalt(saltRounds);
-      let hashedText = await bcrypt.hash(text, salt);
-      return hashedText;       
-    }
+import * as bcrypt from "bcrypt";
 
-    public static async AreEqual(clearText, hash):Promise<boolean>{
-        let areEqual = await bcrypt.compare(clearText, hash);
-        return areEqual;
-    }
+export class HashingUtils {
+	public static async HashText(text: string): Promise<string> {
+		const saltRounds = 10;
+		let salt: string = await bcrypt.genSalt(saltRounds);
+		let hashedText = await bcrypt.hash(text, salt);
+		return hashedText;
+	}
+
+	public static async AreEqual(clearText, hash): Promise<boolean> {
+		let areEqual;
+		try {
+			areEqual = await bcrypt.compare(clearText, hash);
+		} catch (error) {
+			areEqual = false;
+		}
+		return areEqual;
+	}
 }

@@ -1,7 +1,12 @@
 /** @format */
 
+import * as mongoose from "mongoose";
+
+/** @format */
+
 interface User {
-	Email: string;
+	_id?: mongoose.Types.ObjectId;
+	Email?: string;
 	Password?: string;
 }
 
