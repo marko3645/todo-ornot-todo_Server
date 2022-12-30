@@ -33,7 +33,7 @@
 		"express-session": "^1.17.0",
 		"inversify": "^5.0.1",
 		"inversify-express-utils": "^6.3.2",
-		"mocha": "^7.1.0",
+		"mocha": "^10.2.0",
 		"mongodb": "^3.5.2",
 		"mongoose": "^5.8.11",
 		"passport": "^0.4.1",
